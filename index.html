@@ -12,7 +12,6 @@
     <style>
         /* --- CSS Стили (Apple Style Design) --- */
         
-        /* Исправление прокрутки: включаем отступы в расчет размеров элементов */
         * {
             box-sizing: border-box;
         }
@@ -37,9 +36,7 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            /* Исправлено для мобильных: min-height не будет создавать лишний скролл благодаря box-sizing */
             min-height: 100vh;
-            /* Для современных мобильных браузеров (учитывает адресную строку) */
             min-height: 100dvh; 
             -webkit-font-smoothing: antialiased;
         }
@@ -48,7 +45,6 @@
             width: 100%;
             max-width: 700px;
             margin-top: 20px;
-            /* Предотвращает прилипание к низу на маленьких экранах */
             margin-bottom: 20px; 
         }
 
@@ -95,7 +91,12 @@
         .footer-nav { display: flex; justify-content: space-between; gap: 15px; margin-top: 30px; }
         .reset-button {
             background: none; color: var(--danger-color); text-align: center;
-            font-weight: 500; padding: 12px; margin-top: 10px; border: 1px solid transparent;
+            font-weight: 500; padding: 12px; margin-top: 15px; border: 1px solid transparent;
+            width: 100%;
+        }
+        .reset-button:hover {
+            background-color: rgba(255, 59, 48, 0.05);
+            border-radius: 10px;
         }
 
         .assessment-grid { display: grid; gap: 20px; }
@@ -146,7 +147,7 @@
             <input type="date" id="user-dob" required />
             
             <button type="submit" id="start-assessment" class="primary">Начать Путешествие</button>
-            <button type="button" id="reset-button-setup" class="reset-button">Сбросить историю и начать заново</button>
+            <button type="button" id="reset-button-setup" class="reset-button">Удалить всё и начать с нуля</button>
         </form>
     </div>
 
@@ -159,10 +160,13 @@
             <p><strong>8-10:</strong> Расцвет, счастье, полный успех.</p>
         </div>
         <div id="assessment-fields" class="assessment-grid"></div>
+        
         <footer class="footer-nav">
             <button id="back-button" class="nav-button back-button">← Назад</button>
             <button id="continue-button" class="nav-button primary">Сохранить и далее →</button>
         </footer>
+        
+        <button id="reset-button-assessment" class="reset-button">Удалить всё и начать с нуля</button>
     </div>
     
     <div id="screen-results" class="card" style="display: none;">
@@ -187,17 +191,17 @@
         <div class="footer-nav">
              <button id="back-to-edit" class="nav-button back-button" style="width: 100%">← Вернуться к правкам</button>
         </div>
+        
         <button id="reset-button-results" class="reset-button" style="margin-top: 20px;">Удалить всё и начать с нуля</button>
     </div>
 </div>
 
 <script>
     // --- КОНСТАНТЫ И ДАННЫЕ ---
-    const STORAGE_KEY = 'life_line_app_v8_text_update';
+    const STORAGE_KEY = 'life_line_app_v10_reset_fix';
     const START_AGE = 7;
     const DEFAULT_SCORE = 5;
 
-    // Обновленные тексты сфер для большей понятности и эмоционального отклика
     const SPHERES = [
         { key: 'health', label: 'Здоровье 🏃', description: "Самочувствие, уровень энергии, сон, спорт и отсутствие болезней.", color: '#2C3E50' }, 
         { key: 'growth', label: 'Развитие 🧠', description: "Новые знания, навыки, чтение книг, обучение и работа над собой.", color: '#8D6E63' }, 
@@ -287,7 +291,6 @@
         const age = state.currentAge;
         const year = new Date(state.dob).getFullYear() + age;
         
-        // Более дружелюбный заголовок
         document.getElementById('assessment-title').textContent = `Мне ${age} лет (${year} год)`;
         
         const container = document.getElementById('assessment-fields');
@@ -339,7 +342,6 @@
     // --- ГРАФИК (ЭКРАННАЯ ВЕРСИЯ) ---
     function showResults() {
         showScreen('results');
-        // Улучшенное описание в результатах
         document.getElementById('result-user-info').innerText = `История: ${state.name} | Возраст: ${START_AGE} — ${state.maxAge} лет`;
         
         const ctx = document.getElementById('lifeChart').getContext('2d');
@@ -413,7 +415,6 @@
 
             document.body.appendChild(exportContainer);
 
-            // Обновленные заголовки внутри PDF
             const headerHtml = `
                 <div style="text-align: center; margin-bottom: 20px;">
                     <h1 style="font-size: 48px; margin: 0; color: #1c1c1e;">Моя Линия Жизни</h1>
@@ -535,8 +536,12 @@
         document.getElementById('setup-form').addEventListener('submit', handleSetupSubmit);
         document.getElementById('continue-button').addEventListener('click', handleContinue);
         document.getElementById('back-button').addEventListener('click', handleBack);
+        
+        // Кнопки сброса (на всех экранах)
         document.getElementById('reset-button-setup').addEventListener('click', handleReset);
+        document.getElementById('reset-button-assessment').addEventListener('click', handleReset); // Новый
         document.getElementById('reset-button-results').addEventListener('click', handleReset);
+        
         document.getElementById('back-to-edit').addEventListener('click', () => {
             state.currentAge = Math.min(state.maxAge, getLastFilledAge());
             renderAssessmentScreen();
