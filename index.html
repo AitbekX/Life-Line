@@ -29,7 +29,8 @@
         }
 
         html {
-            height: 100%;
+            /* Фикс для iOS и Chrome Mobile */
+            height: -webkit-fill-available;
         }
 
         body {
@@ -37,23 +38,21 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            /* Убрали padding у body, чтобы избежать лишней прокрутки */
-            padding: 0; 
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            /* Используем padding для отступов от краев экрана */
+            padding: 20px 15px; 
+            /* Отключаем Flexbox на body, так как он часто вызывает баги скролла на мобильных */
+            display: block; 
             min-height: 100vh;
-            /* Поддержка мобильных браузеров */
             min-height: -webkit-fill-available;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden; /* Запрещаем горизонтальный скролл */
         }
 
         .app-container {
             width: 100%;
             max-width: 700px;
-            /* Перенесли отступы сюда. Теперь они внутри потока и не создают лишнюю высоту */
-            padding: 20px 15px; 
-            margin: 0 auto;
+            /* Центрируем блочный контейнер */
+            margin: 0 auto; 
         }
 
         .card {
@@ -213,7 +212,7 @@
 
 <script>
     // --- КОНСТАНТЫ И ДАННЫЕ ---
-    const STORAGE_KEY = 'life_line_app_v12_final_fix';
+    const STORAGE_KEY = 'life_line_app_v13_scroll_fix';
     const START_AGE = 7;
     const DEFAULT_SCORE = 5;
 
@@ -416,9 +415,15 @@
         try {
             const exportContainer = document.createElement('div');
             exportContainer.id = 'pdf-export-container';
+            // ВАЖНОЕ ИСПРАВЛЕНИЕ: Прячем элемент через visibility и z-index, а не через left
+            // Это предотвращает появление горизонтального или "пустого" скролла
             exportContainer.style.position = 'fixed';
-            exportContainer.style.left = '-9999px'; 
             exportContainer.style.top = '0';
+            exportContainer.style.left = '0';
+            exportContainer.style.visibility = 'hidden'; 
+            exportContainer.style.pointerEvents = 'none';
+            exportContainer.style.zIndex = '-100';
+            
             exportContainer.style.width = '2000px';
             exportContainer.style.height = '1415px';
             exportContainer.style.backgroundColor = '#ffffff';
@@ -427,7 +432,6 @@
             exportContainer.style.display = 'flex';
             exportContainer.style.flexDirection = 'column';
             exportContainer.style.fontFamily = 'Arial, sans-serif';
-            exportContainer.style.zIndex = '-1';
 
             document.body.appendChild(exportContainer);
 
