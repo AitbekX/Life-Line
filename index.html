@@ -14,6 +14,7 @@
         
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* Убирает подсветку при тапе на мобильных */
         }
 
         :root {
@@ -27,81 +28,96 @@
             --success-color: #34c759;
         }
 
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
-            padding: 20px;
+            /* Важное исправление прокрутки: используем padding только тут */
+            padding: 20px 15px; 
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            min-height: 100dvh; 
+            align-items: flex-start; /* flex-start важен, чтобы контент не обрезался сверху при скролле */
+            min-height: 100dvh; /* Используем dvh для корректной работы с мобильными барами */
             -webkit-font-smoothing: antialiased;
         }
 
         .app-container {
             width: 100%;
             max-width: 700px;
-            margin-top: 20px;
-            margin-bottom: 20px; 
+            /* Убрали margin-top/bottom, чтобы не создавать лишнюю высоту */
+            margin: 0 auto; 
         }
 
         .card {
             background-color: var(--card-bg);
             border-radius: 16px;
-            padding: 30px;
+            padding: 25px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+            /* Отступ только снизу карточки, чтобы отделять их друг от друга */
             margin-bottom: 20px;
             transition: transform 0.2s ease;
         }
 
-        h1 { font-size: 28px; text-align: center; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.5px; }
-        .header p { text-align: center; color: var(--secondary-text); margin-bottom: 30px; margin-top: 0; line-height: 1.4; }
-        h2 { font-size: 22px; margin-bottom: 20px; font-weight: 600; }
+        /* Заголовки и тексты */
+        h1 { font-size: 26px; text-align: center; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { text-align: center; color: var(--secondary-text); margin-bottom: 25px; margin-top: 0; line-height: 1.4; font-size: 15px; }
+        h2 { font-size: 20px; margin-bottom: 20px; font-weight: 600; }
 
         .assessment-guidance {
-            padding: 16px; background-color: #f0f8ff; border-radius: 12px;
-            margin-bottom: 25px; font-size: 14px; line-height: 1.5;
+            padding: 15px; background-color: #f0f8ff; border-radius: 12px;
+            margin-bottom: 25px; font-size: 13px; line-height: 1.5;
             border-left: 4px solid var(--primary-color);
         }
-        .assessment-guidance p { margin: 5px 0; }
+        .assessment-guidance p { margin: 4px 0; }
 
+        /* Формы */
         label { display: block; font-weight: 500; margin-top: 15px; margin-bottom: 8px; font-size: 14px; color: var(--secondary-text); }
         input[type="text"], input[type="date"] {
             width: 100%; padding: 14px; border: 1px solid var(--border-color);
-            border-radius: 10px; font-size: 16px; box-sizing: border-box;
+            border-radius: 12px; font-size: 16px; box-sizing: border-box;
             background: #fff; -webkit-appearance: none;
         }
         input:focus { outline: none; border-color: var(--primary-color); }
 
+        /* Кнопки */
         button {
             width: 100%; padding: 16px; margin-top: 20px; border: none;
-            border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer;
+            border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer;
             transition: all 0.2s; touch-action: manipulation;
         }
         button.primary { background-color: var(--primary-color); color: white; }
         button.primary:hover { background-color: #0063ce; }
+        
         button.nav-button { width: 48%; margin-top: 0; }
         button.back-button { background-color: #e5e5ea; color: var(--text-color); }
         button.back-button:hover { background-color: #d1d1d6; }
+        
         button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .footer-nav { display: flex; justify-content: space-between; gap: 15px; margin-top: 30px; }
+        .footer-nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 30px; }
+        
         .reset-button {
             background: none; color: var(--danger-color); text-align: center;
             font-weight: 500; padding: 12px; margin-top: 15px; border: 1px solid transparent;
             width: 100%;
+            font-size: 14px;
         }
         .reset-button:hover {
             background-color: rgba(255, 59, 48, 0.05);
             border-radius: 10px;
         }
 
-        .assessment-grid { display: grid; gap: 20px; }
-        .sphere-block { border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: #fafafa; }
-        .sphere-block h3 { margin: 0 0 5px 0; font-size: 17px; font-weight: 600; }
+        /* Сетка оценки */
+        .assessment-grid { display: grid; gap: 15px; }
+        .sphere-block { border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; background: #fafafa; }
+        .sphere-block h3 { margin: 0 0 5px 0; font-size: 16px; font-weight: 600; }
         .sphere-block .description { color: var(--secondary-text); font-size: 13px; margin-bottom: 15px; line-height: 1.4; }
 
         .slider-wrapper { display: flex; align-items: center; gap: 15px; }
@@ -109,18 +125,18 @@
         
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%;
+            -webkit-appearance: none; height: 26px; width: 26px; border-radius: 50%;
             background: #ffffff; border: 0.5px solid rgba(0,0,0,0.1);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer; margin-top: -10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer; margin-top: -11px;
         }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #d1d1d6; border-radius: 2px; }
 
-        /* Экранный график */
-        #chart-wrapper { position: relative; background: white; padding: 10px; border-radius: 8px; }
+        /* График */
+        #chart-wrapper { position: relative; background: white; padding: 5px; border-radius: 8px; }
         #chart-container { width: 100%; height: 400px; margin-top: 20px; }
         
         @media (max-width: 600px) {
-            body { padding: 10px; }
+            body { padding: 15px 10px; } /* Уменьшаем отступы на мобилке */
             .card { padding: 20px; margin-bottom: 15px; }
             h1 { font-size: 24px; }
             button { padding: 14px; font-size: 16px; }
@@ -198,10 +214,11 @@
 
 <script>
     // --- КОНСТАНТЫ И ДАННЫЕ ---
-    const STORAGE_KEY = 'life_line_app_v10_reset_fix';
+    const STORAGE_KEY = 'life_line_app_v11_mobile_fix';
     const START_AGE = 7;
     const DEFAULT_SCORE = 5;
 
+    // Тексты сфер
     const SPHERES = [
         { key: 'health', label: 'Здоровье 🏃', description: "Самочувствие, уровень энергии, сон, спорт и отсутствие болезней.", color: '#2C3E50' }, 
         { key: 'growth', label: 'Развитие 🧠', description: "Новые знания, навыки, чтение книг, обучение и работа над собой.", color: '#8D6E63' }, 
@@ -537,9 +554,9 @@
         document.getElementById('continue-button').addEventListener('click', handleContinue);
         document.getElementById('back-button').addEventListener('click', handleBack);
         
-        // Кнопки сброса (на всех экранах)
+        // Кнопки сброса
         document.getElementById('reset-button-setup').addEventListener('click', handleReset);
-        document.getElementById('reset-button-assessment').addEventListener('click', handleReset); // Новый
+        document.getElementById('reset-button-assessment').addEventListener('click', handleReset);
         document.getElementById('reset-button-results').addEventListener('click', handleReset);
         
         document.getElementById('back-to-edit').addEventListener('click', () => {
