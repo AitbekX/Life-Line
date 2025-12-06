@@ -11,6 +11,12 @@
     
     <style>
         /* --- CSS Стили (Apple Style Design) --- */
+        
+        /* Исправление прокрутки: включаем отступы в расчет размеров элементов */
+        * {
+            box-sizing: border-box;
+        }
+
         :root {
             --primary-color: #007aff; 
             --bg-color: #f2f2f7;
@@ -31,7 +37,10 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
+            /* Исправлено для мобильных: min-height не будет создавать лишний скролл благодаря box-sizing */
             min-height: 100vh;
+            /* Для современных мобильных браузеров (учитывает адресную строку) */
+            min-height: 100dvh; 
             -webkit-font-smoothing: antialiased;
         }
 
@@ -39,6 +48,8 @@
             width: 100%;
             max-width: 700px;
             margin-top: 20px;
+            /* Предотвращает прилипание к низу на маленьких экранах */
+            margin-bottom: 20px; 
         }
 
         .card {
@@ -122,7 +133,7 @@
 <div class="app-container">
     <header class="header">
         <h1 id="main-title">Моя Линия Жизни</h1>
-        <p id="subtitle">Взгляните на свой путь целиком. Честный анализ прошлого — фундамент для лучшего будущего.</p>
+        <p id="subtitle">Взгляните на свой путь целиком.<br>Честный анализ прошлого — фундамент для лучшего будущего.</p>
     </header>
 
     <div id="screen-setup" class="card">
@@ -142,7 +153,7 @@
     <div id="screen-assessment" class="card" style="display: none;">
         <h2 id="assessment-title">Вспоминаем ... год</h2>
         <div class="assessment-guidance">
-            <p>Постарайтесь погрузиться в воспоминания того времени. Оцените уровень удовлетворенности каждой сферой:</p>
+            <p>Постарайтесь погрузиться в воспоминания того времени.<br>Оцените уровень удовлетворенности каждой сферой:</p>
             <p><strong>0-3:</strong> Кризис, упадок, тяжелый период.</p>
             <p><strong>4-7:</strong> Нормально, стабильно, но есть над чем работать.</p>
             <p><strong>8-10:</strong> Расцвет, счастье, полный успех.</p>
