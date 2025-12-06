@@ -29,30 +29,37 @@
         }
 
         html {
-            /* Фикс для iOS и Chrome Mobile */
-            height: -webkit-fill-available;
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden; /* Запрещаем горизонтальный скролл на уровне HTML */
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
+            
+            /* ИСПРАВЛЕНИЕ ПРОКРУТКИ: */
             margin: 0;
-            /* Используем padding для отступов от краев экрана */
-            padding: 20px 15px; 
-            /* Отключаем Flexbox на body, так как он часто вызывает баги скролла на мобильных */
-            display: block; 
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
+            padding: 0; /* Убираем padding у body совсем */
+            
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Контент начинается сверху */
+            
+            min-height: 100%; /* Вместо 100vh используем %, это надежнее на мобильных */
             -webkit-font-smoothing: antialiased;
-            overflow-x: hidden; /* Запрещаем горизонтальный скролл */
+            overflow-x: hidden;
         }
 
         .app-container {
             width: 100%;
             max-width: 700px;
-            /* Центрируем блочный контейнер */
-            margin: 0 auto; 
+            
+            /* ИСПРАВЛЕНИЕ ПРОКРУТКИ: */
+            /* Отступы теперь здесь. Если контента мало, высота контейнера меньше высоты экрана -> скролла нет */
+            padding: 20px 15px; 
+            margin: 0 auto;
         }
 
         .card {
@@ -212,7 +219,7 @@
 
 <script>
     // --- КОНСТАНТЫ И ДАННЫЕ ---
-    const STORAGE_KEY = 'life_line_app_v13_scroll_fix';
+    const STORAGE_KEY = 'life_line_app_v14_final_stable';
     const START_AGE = 7;
     const DEFAULT_SCORE = 5;
 
@@ -415,12 +422,13 @@
         try {
             const exportContainer = document.createElement('div');
             exportContainer.id = 'pdf-export-container';
-            // ВАЖНОЕ ИСПРАВЛЕНИЕ: Прячем элемент через visibility и z-index, а не через left
-            // Это предотвращает появление горизонтального или "пустого" скролла
+            // ИСПРАВЛЕНИЕ PDF: 
+            // 1. Возвращаем позиционирование влево (left)
+            // 2. Используем opacity: 0 вместо visibility: hidden
             exportContainer.style.position = 'fixed';
+            exportContainer.style.left = '-10000px'; 
             exportContainer.style.top = '0';
-            exportContainer.style.left = '0';
-            exportContainer.style.visibility = 'hidden'; 
+            exportContainer.style.opacity = '0'; 
             exportContainer.style.pointerEvents = 'none';
             exportContainer.style.zIndex = '-100';
             
