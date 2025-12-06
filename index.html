@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Моя Линия Жизни</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* --- CSS Стили (Apple Style Design) --- */
+        :root {
+            --primary-color: #007aff; 
+            --bg-color: #f2f2f7;
+            --card-bg: #ffffff;
+            --border-color: #e5e5ea;
+            --text-color: #1c1c1e;
+            --secondary-text: #8e8e93;
+            --danger-color: #ff3b30;
+            --success-color: #34c759;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 700px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+            margin-bottom: 20px;
+            transition: transform 0.2s ease;
+        }
+
+        h1 { font-size: 28px; text-align: center; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { text-align: center; color: var(--secondary-text); margin-bottom: 30px; margin-top: 0; line-height: 1.4; }
+        h2 { font-size: 22px; margin-bottom: 20px; font-weight: 600; }
+
+        .assessment-guidance {
+            padding: 16px; background-color: #f0f8ff; border-radius: 12px;
+            margin-bottom: 25px; font-size: 14px; line-height: 1.5;
+            border-left: 4px solid var(--primary-color);
+        }
+        .assessment-guidance p { margin: 5px 0; }
+
+        label { display: block; font-weight: 500; margin-top: 15px; margin-bottom: 8px; font-size: 14px; color: var(--secondary-text); }
+        input[type="text"], input[type="date"] {
+            width: 100%; padding: 14px; border: 1px solid var(--border-color);
+            border-radius: 10px; font-size: 16px; box-sizing: border-box;
+            background: #fff; -webkit-appearance: none;
+        }
+        input:focus { outline: none; border-color: var(--primary-color); }
+
+        button {
+            width: 100%; padding: 16px; margin-top: 20px; border: none;
+            border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; touch-action: manipulation;
+        }
+        button.primary { background-color: var(--primary-color); color: white; }
+        button.primary:hover { background-color: #0063ce; }
+        button.nav-button { width: 48%; margin-top: 0; }
+        button.back-button { background-color: #e5e5ea; color: var(--text-color); }
+        button.back-button:hover { background-color: #d1d1d6; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .footer-nav { display: flex; justify-content: space-between; gap: 15px; margin-top: 30px; }
+        .reset-button {
+            background: none; color: var(--danger-color); text-align: center;
+            font-weight: 500; padding: 12px; margin-top: 10px; border: 1px solid transparent;
+        }
+
+        .assessment-grid { display: grid; gap: 20px; }
+        .sphere-block { border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: #fafafa; }
+        .sphere-block h3 { margin: 0 0 5px 0; font-size: 17px; font-weight: 600; }
+        .sphere-block .description { color: var(--secondary-text); font-size: 13px; margin-bottom: 15px; line-height: 1.4; }
+
+        .slider-wrapper { display: flex; align-items: center; gap: 15px; }
+        .score-display { font-size: 20px; font-weight: 700; width: 35px; text-align: center; color: var(--primary-color); }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%;
+            background: #ffffff; border: 0.5px solid rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer; margin-top: -10px;
+        }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #d1d1d6; border-radius: 2px; }
+
+        /* Экранный график */
+        #chart-wrapper { position: relative; background: white; padding: 10px; border-radius: 8px; }
+        #chart-container { width: 100%; height: 400px; margin-top: 20px; }
+        
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .card { padding: 20px; margin-bottom: 15px; }
+            h1 { font-size: 24px; }
+            button { padding: 14px; font-size: 16px; }
+            #chart-container { height: 300px; }
+            .sphere-block { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="header">
+        <h1 id="main-title">Моя Линия Жизни</h1>
+        <p id="subtitle">Взгляните на свой путь целиком. Честный анализ прошлого — фундамент для лучшего будущего.</p>
+    </header>
+
+    <div id="screen-setup" class="card">
+        <h2>Давайте познакомимся ☺️</h2>
+        <form id="setup-form">
+            <label for="user-name">Как к вам обращаться?</label>
+            <input type="text" id="user-name" placeholder="Введите ваше имя" required autocomplete="off"/>
+            
+            <label for="user-dob">Дата Рождения</label>
+            <input type="date" id="user-dob" required />
+            
+            <button type="submit" id="start-assessment" class="primary">Начать Путешествие</button>
+            <button type="button" id="reset-button-setup" class="reset-button">Сбросить историю и начать заново</button>
+        </form>
+    </div>
+
+    <div id="screen-assessment" class="card" style="display: none;">
+        <h2 id="assessment-title">Вспоминаем ... год</h2>
+        <div class="assessment-guidance">
+            <p>Постарайтесь погрузиться в воспоминания того времени. Оцените уровень удовлетворенности каждой сферой:</p>
+            <p><strong>0-3:</strong> Кризис, упадок, тяжелый период.</p>
+            <p><strong>4-7:</strong> Нормально, стабильно, но есть над чем работать.</p>
+            <p><strong>8-10:</strong> Расцвет, счастье, полный успех.</p>
+        </div>
+        <div id="assessment-fields" class="assessment-grid"></div>
+        <footer class="footer-nav">
+            <button id="back-button" class="nav-button back-button">← Назад</button>
+            <button id="continue-button" class="nav-button primary">Сохранить и далее →</button>
+        </footer>
+    </div>
+    
+    <div id="screen-results" class="card" style="display: none;">
+        
+        <div>
+            <h2 style="text-align: center; margin-top: 0;">Ваша Карта Жизни</h2>
+            <p id="result-user-info" style="text-align: center; color: #8e8e93; font-size: 14px; margin-bottom: 10px;"></p>
+            
+            <div id="chart-wrapper">
+                <div id="chart-container">
+                    <canvas id="lifeChart"></canvas>
+                </div>
+            </div>
+            
+            <div id="results-footer" style="text-align: center; margin-top: 10px; font-size: 12px; color: #ccc;">
+                Нажмите на кружки (название сферы), чтобы скрыть/показать линии.
+            </div>
+        </div>
+        
+        <button id="download-pdf" class="primary" style="background-color: #34c759; margin-top: 30px;">Скачать PDF</button>
+        
+        <div class="footer-nav">
+             <button id="back-to-edit" class="nav-button back-button" style="width: 100%">← Вернуться к правкам</button>
+        </div>
+        <button id="reset-button-results" class="reset-button" style="margin-top: 20px;">Удалить всё и начать с нуля</button>
+    </div>
+</div>
+
+<script>
+    // --- КОНСТАНТЫ И ДАННЫЕ ---
+    const STORAGE_KEY = 'life_line_app_v8_text_update';
+    const START_AGE = 7;
+    const DEFAULT_SCORE = 5;
+
+    // Обновленные тексты сфер для большей понятности и эмоционального отклика
+    const SPHERES = [
+        { key: 'health', label: 'Здоровье 🏃', description: "Самочувствие, уровень энергии, сон, спорт и отсутствие болезней.", color: '#2C3E50' }, 
+        { key: 'growth', label: 'Развитие 🧠', description: "Новые знания, навыки, чтение книг, обучение и работа над собой.", color: '#8D6E63' }, 
+        { key: 'family', label: 'Семья 💞', description: "Атмосфера дома, отношения с партнером, родителями и детьми.", color: '#2ECC71' }, 
+        { key: 'environment', label: 'Окружение 👥', description: "Друзья и люди вокруг. Насколько они вас поддерживают и вдохновляют?", color: '#9B59B6' }, 
+        { key: 'career', label: 'Карьера 👨‍💻', description: "Профессиональный рост, бизнес, удовлетворение от того, чем занимаетесь.", color: '#E67E22' }, 
+        { key: 'wealth', label: 'Благосостояние 💵', description: "Доходы, наличие подушки безопасности и отсутствие тревоги за деньги.", color: '#E74C3C' }, 
+        { key: 'hobby', label: 'Хобби 🚵', description: "Путешествия, хобби, развлечения и моменты чистого удовольствия.", color: '#F1C40F' }, 
+        { key: 'spirit', label: 'Духовность ♾️', description: "Внутреннее спокойствие, гармония, понимание своих ценностей и смыслов.", color: '#3498DB' }  
+    ];
+
+    let state = { name: '', dob: '', currentAge: START_AGE, maxAge: START_AGE, assessments: [] };
+    let chartInstance = null;
+
+    // --- ИНИЦИАЛИЗАЦИЯ ---
+    document.addEventListener('DOMContentLoaded', () => {
+        loadState();
+        initEventListeners();
+        if (!state.name || !state.dob) {
+            showScreen('setup');
+        } else {
+            const lastFilled = getLastFilledAge();
+            state.currentAge = lastFilled + 1;
+            if (state.currentAge > state.maxAge) showResults();
+            else renderAssessmentScreen();
+        }
+    });
+
+    // --- ЛОГИКА ДАННЫХ ---
+    function loadState() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            try {
+                const parsed = JSON.parse(raw);
+                state = { ...state, ...parsed };
+                if (state.dob) state.maxAge = calculateCurrentAge(state.dob);
+            } catch (e) { console.error(e); }
+        }
+    }
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function calculateCurrentAge(dobString) {
+        if (!dobString) return START_AGE;
+        const dob = new Date(dobString);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) age--;
+        return Math.max(START_AGE, age);
+    }
+    function getLastFilledAge() {
+        if (state.assessments.length === 0) return START_AGE - 1;
+        return Math.max(...state.assessments.map(a => a.age));
+    }
+    function getScoresForAge(age) {
+        const record = state.assessments.find(a => a.age === age);
+        return record ? record.scores : null;
+    }
+    function saveScoresForAge(age, scores) {
+        const index = state.assessments.findIndex(a => a.age === age);
+        if (index >= 0) state.assessments[index].scores = scores;
+        else {
+            state.assessments.push({ age, scores });
+            state.assessments.sort((a, b) => a.age - b.age);
+        }
+        saveState();
+    }
+
+    // --- UI И НАВИГАЦИЯ ---
+    function showScreen(screenId) {
+        document.querySelectorAll('.app-container > .card').forEach(el => el.style.display = 'none');
+        document.getElementById(`screen-${screenId}`).style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function handleSetupSubmit(e) {
+        e.preventDefault();
+        const nameInput = document.getElementById('user-name').value.trim();
+        const dobInput = document.getElementById('user-dob').value;
+        if (!nameInput || !dobInput) return;
+        const calculatedMaxAge = calculateCurrentAge(dobInput);
+        if (calculatedMaxAge < START_AGE) { alert(`Приложение рассчитано на возраст от ${START_AGE} лет.`); return; }
+        state.name = nameInput; state.dob = dobInput; state.maxAge = calculatedMaxAge; state.currentAge = START_AGE;
+        saveState(); renderAssessmentScreen();
+    }
+
+    function renderAssessmentScreen() {
+        showScreen('assessment');
+        const age = state.currentAge;
+        const year = new Date(state.dob).getFullYear() + age;
+        
+        // Более дружелюбный заголовок
+        document.getElementById('assessment-title').textContent = `Мне ${age} лет (${year} год)`;
+        
+        const container = document.getElementById('assessment-fields');
+        container.innerHTML = '';
+        const existingScores = getScoresForAge(age);
+        
+        SPHERES.forEach(sphere => {
+            const value = existingScores ? existingScores[sphere.key] : DEFAULT_SCORE;
+            const div = document.createElement('div');
+            div.className = 'sphere-block';
+            div.innerHTML = `
+                <h3>${sphere.label}</h3>
+                <p class="description">${sphere.description}</p>
+                <div class="slider-wrapper">
+                    <span class="score-display" id="val-${sphere.key}">${value}</span>
+                    <input type="range" min="0" max="10" step="1" value="${value}" data-key="${sphere.key}"
+                        oninput="document.getElementById('val-${sphere.key}').innerText = this.value">
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        const btnBack = document.getElementById('back-button');
+        const btnContinue = document.getElementById('continue-button');
+        btnBack.disabled = (age <= START_AGE);
+        if (age >= state.maxAge) {
+            btnContinue.innerText = "Завершить и посмотреть Карту Жизни 🏁";
+            btnContinue.classList.remove('primary');
+            btnContinue.style.backgroundColor = '#34c759'; btnContinue.style.color = '#fff';
+        } else {
+            btnContinue.innerText = "Сохранить и далее →";
+            btnContinue.classList.add('primary'); btnContinue.style.backgroundColor = ''; 
+        }
+    }
+
+    function handleContinue() {
+        const inputs = document.querySelectorAll('#assessment-fields input[type="range"]');
+        const scores = {};
+        inputs.forEach(inp => scores[inp.dataset.key] = parseInt(inp.value, 10));
+        saveScoresForAge(state.currentAge, scores);
+        if (state.currentAge >= state.maxAge) showResults();
+        else { state.currentAge++; renderAssessmentScreen(); }
+    }
+
+    function handleBack() {
+        if (state.currentAge > START_AGE) { state.currentAge--; renderAssessmentScreen(); }
+    }
+
+    // --- ГРАФИК (ЭКРАННАЯ ВЕРСИЯ) ---
+    function showResults() {
+        showScreen('results');
+        // Улучшенное описание в результатах
+        document.getElementById('result-user-info').innerText = `История: ${state.name} | Возраст: ${START_AGE} — ${state.maxAge} лет`;
+        
+        const ctx = document.getElementById('lifeChart').getContext('2d');
+        const chartData = prepareChartData();
+
+        if (chartInstance) chartInstance.destroy();
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { min: 0, max: 10, grid: { color: '#f0f0f0' } },
+                    x: {
+                        grid: { display: false },
+                        ticks: { autoSkip: true, maxRotation: 0 } 
+                    }
+                },
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 10, padding: 15 } },
+                    tooltip: { 
+                        mode: 'index', 
+                        intersect: false,
+                        callbacks: {
+                            title: (context) => `${context[0].label} лет`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function prepareChartData() {
+        const labels = state.assessments.map(a => a.age);
+        const datasets = SPHERES.map(sphere => ({
+            label: sphere.label,
+            data: state.assessments.map(a => a.scores[sphere.key]),
+            borderColor: sphere.color,
+            backgroundColor: sphere.color,
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 2
+        }));
+        return { labels, datasets };
+    }
+
+    // --- PDF ГЕНЕРАЦИЯ ---
+    async function handleDownloadPDF() {
+        const btn = document.getElementById('download-pdf');
+        const originalText = btn.innerText;
+        btn.innerText = "Формируем документ...";
+        btn.disabled = true;
+
+        try {
+            const exportContainer = document.createElement('div');
+            exportContainer.id = 'pdf-export-container';
+            exportContainer.style.position = 'fixed';
+            exportContainer.style.left = '-9999px'; 
+            exportContainer.style.top = '0';
+            exportContainer.style.width = '2000px';
+            exportContainer.style.height = '1415px';
+            exportContainer.style.backgroundColor = '#ffffff';
+            exportContainer.style.padding = '40px';
+            exportContainer.style.boxSizing = 'border-box';
+            exportContainer.style.display = 'flex';
+            exportContainer.style.flexDirection = 'column';
+            exportContainer.style.fontFamily = 'Arial, sans-serif';
+            exportContainer.style.zIndex = '-1';
+
+            document.body.appendChild(exportContainer);
+
+            // Обновленные заголовки внутри PDF
+            const headerHtml = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h1 style="font-size: 48px; margin: 0; color: #1c1c1e;">Моя Линия Жизни</h1>
+                    <p style="font-size: 28px; color: #8e8e93; margin: 10px 0;">${state.name}: Анализ пути с ${START_AGE} до ${state.maxAge} лет</p>
+                </div>
+            `;
+            
+            const canvasContainer = document.createElement('div');
+            canvasContainer.style.flex = '1';
+            canvasContainer.style.width = '100%';
+            canvasContainer.style.position = 'relative';
+            canvasContainer.style.minHeight = '1000px'; 
+            
+            const canvasElement = document.createElement('canvas');
+            canvasContainer.appendChild(canvasElement);
+
+            const footerHtml = `
+                <div style="text-align: center; margin-top: 20px; color: #cccccc; font-size: 18px;">
+                    Документ сформирован: ${new Date().toLocaleDateString()}
+                </div>
+            `;
+
+            exportContainer.innerHTML = headerHtml;
+            exportContainer.appendChild(canvasContainer);
+            exportContainer.insertAdjacentHTML('beforeend', footerHtml);
+
+            const chartData = prepareChartData();
+            
+            if (chartInstance) {
+                chartData.datasets.forEach((dataset, index) => {
+                    const meta = chartInstance.getDatasetMeta(index);
+                    if (meta.hidden) {
+                        dataset.hidden = true;
+                    }
+                });
+            }
+
+            new Chart(canvasElement.getContext('2d'), {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false, 
+                    devicePixelRatio: 2, 
+                    layout: { padding: 20 },
+                    scales: {
+                        y: {
+                            min: 0, max: 10,
+                            ticks: { font: { size: 24 } }, 
+                            grid: { color: '#eeeeee', lineWidth: 2 }
+                        },
+                        x: {
+                            ticks: { 
+                                autoSkip: false, 
+                                maxRotation: 0, 
+                                minRotation: 0,
+                                font: { size: 20 } 
+                            },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 24 },
+                                padding: 30,
+                                usePointStyle: true,
+                                boxWidth: 15
+                            }
+                        }
+                    }
+                }
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+            const canvas = await html2canvas(exportContainer, {
+                scale: 1, 
+                useCORS: true,
+                allowTaint: true,
+                width: 2000,
+                height: 1415,
+                scrollY: 0,
+                windowWidth: 2000
+            });
+
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('l', 'mm', 'a4');
+            const pageWidth = 297;
+            const pageHeight = 210;
+
+            pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
+            
+            const fileName = `LifeLine_${state.name || 'My'}_${new Date().toISOString().slice(0,10)}.pdf`;
+            pdf.save(fileName);
+
+            document.body.removeChild(exportContainer);
+
+        } catch (err) {
+            console.error(err);
+            alert("Ошибка при создании PDF.");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    function handleReset() {
+        if (confirm("Вы уверены? Это полностью удалит вашу историю оценок.")) {
+            localStorage.removeItem(STORAGE_KEY);
+            window.location.reload();
+        }
+    }
+
+    function initEventListeners() {
+        document.getElementById('setup-form').addEventListener('submit', handleSetupSubmit);
+        document.getElementById('continue-button').addEventListener('click', handleContinue);
+        document.getElementById('back-button').addEventListener('click', handleBack);
+        document.getElementById('reset-button-setup').addEventListener('click', handleReset);
+        document.getElementById('reset-button-results').addEventListener('click', handleReset);
+        document.getElementById('back-to-edit').addEventListener('click', () => {
+            state.currentAge = Math.min(state.maxAge, getLastFilledAge());
+            renderAssessmentScreen();
+        });
+        document.getElementById('download-pdf').addEventListener('click', handleDownloadPDF);
+    }
+</script>
+</body>
+</html>
